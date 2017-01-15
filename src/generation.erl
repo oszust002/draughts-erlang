@@ -50,8 +50,8 @@ getTheBestMove(Board, Color, Levels) ->
 
 getMoveScores([]) ->
   [];
-getMoveScores([{Pid,_}|T]) ->
+getMoveScores(PidMoveMap) ->
   receive
     {Pid, {Value,Move}} ->
-      [{Value, Move}| getMoveScores(T)]
+      [{Value, Move}| getMoveScores(lists:keydelete(Pid,1,PidMoveMap))]
   end.
