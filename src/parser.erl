@@ -61,12 +61,11 @@ parseToJump(_, _) ->
 parseMoveToString([]) ->
   "";
 
-parseMoveToString([H | T]) ->
-  TailString = lists:concat([lists:concat(["x", integer_to_list(posToInt(X))]) || X <- T]),
-  lists:concat([integer_to_list(posToInt(H)), TailString]);
+parseMoveToString(List) when is_list(List)->
+  string:join([integer_to_list(posToInt(X)) || X <- List], "x");
 
 parseMoveToString({From, To}) ->
-  lists:concat([integer_to_list(posToInt(From)), "-", integer_to_list(posToInt(To))]).
+  string:join([integer_to_list(posToInt(From)), integer_to_list(posToInt(To))], "-").
 
 posToInt({X, Y}) ->
   4 * (X - 1) + ((Y + 1) div 2).
@@ -74,6 +73,5 @@ posToInt({X, Y}) ->
 parseAllMoves([]) ->
   "";
 
-parseAllMoves([H | T]) ->
-  TailString = lists:concat(lists:map(fun(X) -> lists:concat([",", parseMoveToString(X)]) end, T)),
-  lists:concat([parseMoveToString(H), TailString]).
+parseAllMoves(List) ->
+  string:join([parseMoveToString(X) || X<-List], ", ").

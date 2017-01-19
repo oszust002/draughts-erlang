@@ -96,7 +96,7 @@ test_loop(M, F, A, N, List) ->
   test_loop(M, F, A, N - 1, [T | List]).
 
 loadAllModules() ->
-  lists:foreach(fun(Mod) -> loadModule(Mod, nodes()) end, erlang:loaded()).
+  lists:foreach(fun(Mod) -> loadModule(Mod, nodes()) end, [board, utils, moves, generation, parser, evaluation, main]).
 
 loadModule(_, []) ->
   ok;

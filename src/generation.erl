@@ -82,10 +82,11 @@ getTheBestMove(Moves, Board, Color, Levels, CLevels) when Levels >= CLevels ->
   lists:max(getMoveScores(PidMoveMap, S, getTreeValue, [Board, Levels, Color, Color, min])).
 
 getTheBestMove(Board, Color, Levels, CLevels) ->
+  process_flag(trap_exit, true),
   S = self(),
   PermittedMoves = getPermittedMoves(Board, Color),
   BaseArgs = [Board, Color, Levels, CLevels],
-  case nodes() of
+  {_, Move} = case nodes() of
     [] -> getTheBestMove(PermittedMoves, Board, Color, Levels, CLevels);
     Nodes ->
       SplittedMoves = splitList(PermittedMoves, length(Nodes)),
@@ -94,7 +95,8 @@ getTheBestMove(Board, Color, Levels, CLevels) ->
       PidMovesMap = lists:map(fun({Node, Moves}) ->
         {spawn_link(Node, ?MODULE, execute, [S, getTheBestMove, [Moves | BaseArgs]]), Moves} end, Zipped),
       lists:max(getMoveScores(PidMovesMap, S, execute, BaseArgs))
-  end.
+  end,
+  Move.
 
 getMoveScores([], _, _, _) ->
   [];
@@ -103,7 +105,10 @@ getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args) ->
   receive
     {Pid, {Value, Move}} ->
       [{Value, Move} | getMoveScores(lists:keydelete(Pid, 1, PidMoveMap), ParentPid, RestartFunc, Args)];
+    {'EXIT', _, normal} ->
+      getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args);
     {'EXIT', ExitPid, _} ->
+      io:format("pizda"),
       {MoveValue, _, NewList} = lists:keytake(ExitPid, 1, PidMoveMap),
       getMoveScores([spawn_link(fun() ->
         execute(ParentPid, RestartFunc, [MoveValue | Args]) end) | NewList], ParentPid, RestartFunc, Args)

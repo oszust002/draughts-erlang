@@ -6,6 +6,9 @@
 %%% @end
 %%% Created : 01. Jan 2017 19:47
 %%%-------------------------------------------------------------------
+-define(LEVELS, 11).
+-define(CLEVELS, 2).
+
 -define(WHITE_PAWN, {white, pawn}).
 -define(BLACK_PAWN, {black, pawn}).
 -define(WHITE_KING, {white, king}).
