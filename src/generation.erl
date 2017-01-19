@@ -22,7 +22,7 @@ getTreeValue(Move, Board, Levels, 0, Color, MoveColor, max) ->
   ReverseColor = reverseColor(MoveColor),
   case getPermittedMoves(NewBoard, ReverseColor) of
     []  -> {evaluateBoard(Color, NewBoard), Move};
-    List -> {Val,_} = lists:max([getTreeValue(X, Board, Levels-1, 0, Color, ReverseColor, min) || X <- List]),
+    List -> {Val,_} = lists:max([getTreeValue(X, NewBoard, Levels-1, 0, Color, ReverseColor, min) || X <- List]),
       {Val, Move}
   end;
 
@@ -31,7 +31,7 @@ getTreeValue(Move,Board, Levels, 0, Color, MoveColor, min) ->
   ReverseColor = reverseColor(MoveColor),
   case getPermittedMoves(NewBoard, ReverseColor) of
     [] -> {evaluateBoard(Color, NewBoard), Move};
-    List -> {Val,_} = lists:min([getTreeValue(X, Board, Levels-1,0, Color, ReverseColor, max) || X <- List]),
+    List -> {Val,_} = lists:min([getTreeValue(X, NewBoard, Levels-1,0, Color, ReverseColor, max) || X <- List]),
       {Val, Move}
   end;
 
@@ -93,7 +93,7 @@ getTheBestMove(Board, Color, Levels, CLevels) ->
         lists:sublist(SplittedMoves, max(length(SplittedMoves), length(Nodes)))),
       PidMovesMap = lists:map(fun({Node, Moves}) ->
         {spawn_link(Node, ?MODULE, execute, [S, getTheBestMove, [Moves | BaseArgs]]), Moves} end, Zipped),
-      getMoveScores(PidMovesMap, S, execute, BaseArgs)
+      lists:max(getMoveScores(PidMovesMap, S, execute, BaseArgs))
   end.
 
 getMoveScores([],_,_,_) ->

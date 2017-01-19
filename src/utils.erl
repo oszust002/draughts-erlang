@@ -94,3 +94,12 @@ test_loop(_M, _F, _A, 0, List) ->
 test_loop(M, F, A, N, List) ->
   {T, _Result} = timer:tc(M, F, A),
   test_loop(M, F, A, N - 1, [T|List]).
+
+loadAllModules() ->
+  lists:foreach(fun(Mod) -> loadModule(Mod, nodes()) end, erlang:loaded()).
+
+loadModule(_, []) ->
+  ok;
+loadModule(Mod, Nodes) ->
+  {Mod, Bin, File} = code:get_object_code(Mod),
+  {_Replies, _} = rpc:multicall(Nodes, code, load_binary, [Mod, File, Bin]).
