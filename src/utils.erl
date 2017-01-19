@@ -10,7 +10,7 @@
 -author("oszust").
 
 %% API
--export([isEmpty/2, getField/2, isInBounds/1, isKing/1, isPawn/1, replaceNth/3, getColor/1, getFigure/1, signum/1, reverseColor/1]).
+-compile(export_all).
 -include("consts.hrl").
 
 isInBounds({X, Y}) when is_integer(X), is_integer(Y) ->
@@ -52,6 +52,28 @@ reverseColor(white) ->
 
 reverseColor(black) ->
   white.
+
+
+splitList(List, N) when length(List) < N ->
+  splitList(List, length(List));
+
+splitList(List, N) ->
+  Size = length(List) div N,
+  lists:filter(fun(X) -> length(X) > 0 end,splitList(List, Size, [], N)).
+
+splitList([], _, Splitted, _) ->
+  Splitted;
+
+splitList(List, _, Splitted=[H|T], PartSize) when length(Splitted) == PartSize ->
+  [lists:merge([H,List]) | T];
+
+splitList(List, N, Splitted, _) when length(List) < N ->
+  [List | Splitted];
+
+splitList(List, N, Splitted, PartSize) when length(List) >= N ->
+  {Part, Rest} = lists:split(N, List),
+  splitList(Rest, N, [Part|Splitted], PartSize).
+
 
 %% just for time tests
 test_avg(M, F, A, N) when N > 0 ->

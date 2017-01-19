@@ -10,7 +10,7 @@
 -author("oszust").
 -import(moves, [makeMove/2, getPermittedMoves/2]).
 -import(evaluation,[evaluateBoard/2]).
--import(utils, [reverseColor/1]).
+-import(utils, [reverseColor/1, splitList/2]).
 %% API
 -compile(export_all).
 %%-export([]).
@@ -68,21 +68,33 @@ getTreeValue(Move, Board, Levels, CLevels, Color, MoveColor, max)  when Levels >
 execute(Pid, Function, Args) ->
   Pid ! {self(), erlang:apply(?MODULE, Function, Args)}.
 
+
 %% non-concurrent version of getting the best move
-getTheBestMove(Board, Color, Levels, 0) ->
-  PermittedMoves = getPermittedMoves(Board, Color),
-  {_,Move} = lists:max([getTreeValue(X,Board,Levels,0, Color,Color, min) || X <- PermittedMoves]),
-  Move;
+getTheBestMove(Moves, Board, Color, Levels, 0) ->
+  lists:max([getTreeValue(X,Board,Levels,0, Color,Color, min) || X <- Moves]);
 
 %% concurrent version of getting the best move with CLevels down of concurrency
-getTheBestMove(Board, Color, Levels, CLevels)  when Levels >= CLevels ->
-  PermittedMoves = getPermittedMoves(Board, Color),
+getTheBestMove(Moves, Board, Color, Levels, CLevels)  when Levels >= CLevels ->
   S = self(),
   PidMoveMap = lists:map(fun(Element) ->
     {spawn_link(fun() ->
-      execute(S,getTreeValue,[Element,Board,Levels,CLevels,Color,Color, min]) end), Element} end, PermittedMoves),
-  {_,Move} = lists:max(getMoveScores(PidMoveMap,S, getTreeValue, [Board, Levels, Color, Color, min])),
-  Move.
+      execute(S,getTreeValue,[Element,Board,Levels,CLevels,Color,Color, min]) end), Element} end, Moves),
+  lists:max(getMoveScores(PidMoveMap,S, getTreeValue, [Board, Levels, Color, Color, min])).
+
+getTheBestMove(Board, Color, Levels, CLevels) ->
+  S = self(),
+  PermittedMoves = getPermittedMoves(Board, Color),
+  BaseArgs = [Board, Color, Levels, CLevels],
+  case nodes() of
+    [] -> getTheBestMove(PermittedMoves, Board, Color, Levels, CLevels);
+    Nodes ->
+      SplittedMoves = splitList(PermittedMoves, length(Nodes)),
+      Zipped = lists:zip(lists:sublist(Nodes, max(length(SplittedMoves), length(Nodes))),
+        lists:sublist(SplittedMoves, max(length(SplittedMoves), length(Nodes)))),
+      PidMovesMap = lists:map(fun({Node, Moves}) ->
+        {spawn_link(Node, ?MODULE, execute, [S, getTheBestMove, [Moves | BaseArgs]]), Moves} end, Zipped),
+      getMoveScores(PidMovesMap, S, execute, BaseArgs)
+  end.
 
 getMoveScores([],_,_,_) ->
   [];
