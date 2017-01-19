@@ -119,7 +119,7 @@ getEnemyOnDir(Board, Pos, Color, Direction, Step) ->
 
 makeStep(Board, Pos, Color, Direction, Step, Next) ->
   case {isEmpty(Board, Next), Step} of
-    {true, false} -> {Pos, nothing};
+    {true, 0} -> {Pos, nothing};
     {true, _} -> getEnemyOnDir(Board, Next, Color, Direction, Step - 1);
     _Else -> checkOtherCases(Board, Pos, Color, Direction, Next)
   end.
