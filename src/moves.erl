@@ -158,10 +158,10 @@ getJump(Board, Pos, Color) ->
 getJumpList(Board, CurField, Pos, Color, Dir) ->
   {EnemyPos, Field} = getEnemyOnDir(Board, Pos, Color, Dir, getMaxStepLength(CurField)),
   case Field of
-     nothing -> [];
-     _Else ->
-       NextPos = getNeighbour(EnemyPos, Dir),
-       addToEveryList(NextPos, getJump(makeMove(Board, [Pos, NextPos]), NextPos, Color))
+    nothing -> [];
+    _Else ->
+      NextPos = getNeighbour(EnemyPos, Dir),
+      addToEveryList(NextPos, getJump(makeMove(Board, [Pos, NextPos]), NextPos, Color))
   end.
 
 getMaxStepLength({_, king}) ->

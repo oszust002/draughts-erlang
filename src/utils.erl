@@ -59,20 +59,20 @@ splitList(List, N) when length(List) < N ->
 
 splitList(List, N) ->
   Size = length(List) div N,
-  lists:filter(fun(X) -> length(X) > 0 end,splitList(List, Size, [], N)).
+  lists:filter(fun(X) -> length(X) > 0 end, splitList(List, Size, [], N)).
 
 splitList([], _, Splitted, _) ->
   Splitted;
 
-splitList(List, _, Splitted=[H|T], PartSize) when length(Splitted) == PartSize ->
-  [lists:merge([H,List]) | T];
+splitList(List, _, Splitted = [H | T], PartSize) when length(Splitted) == PartSize ->
+  [lists:merge([H, List]) | T];
 
 splitList(List, N, Splitted, _) when length(List) < N ->
   [List | Splitted];
 
 splitList(List, N, Splitted, PartSize) when length(List) >= N ->
   {Part, Rest} = lists:split(N, List),
-  splitList(Rest, N, [Part|Splitted], PartSize).
+  splitList(Rest, N, [Part | Splitted], PartSize).
 
 
 %% just for time tests
@@ -93,7 +93,7 @@ test_loop(_M, _F, _A, 0, List) ->
   List;
 test_loop(M, F, A, N, List) ->
   {T, _Result} = timer:tc(M, F, A),
-  test_loop(M, F, A, N - 1, [T|List]).
+  test_loop(M, F, A, N - 1, [T | List]).
 
 loadAllModules() ->
   lists:foreach(fun(Mod) -> loadModule(Mod, nodes()) end, erlang:loaded()).

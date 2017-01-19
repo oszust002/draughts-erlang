@@ -20,4 +20,4 @@
   [?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing],
   [nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN],
   [?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing]
-  ]).
+]).
