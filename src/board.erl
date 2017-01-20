@@ -29,7 +29,7 @@ printRow({RowNumber, FigureList}) when is_integer(RowNumber), RowNumber > 0, is_
 
 printBoard(Board) when is_list(Board) ->
   BoardString = string:join([printRow(X) || X <- lists:zip(lists:seq(1, 8), Board)], "~n"),
-  io:format(lists:concat(["  1 2 3 4 5 6 7 8 ~n", BoardString, "~n"])).
+  io:format(lists:concat(["~n  1 2 3 4 5 6 7 8 ~n", BoardString, "~n"])).
 
 getInitBoard() ->
   ?INITIAL_BOARD.

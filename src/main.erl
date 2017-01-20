@@ -16,7 +16,7 @@
 
 -include("consts.hrl").
 %% API
--export([start/1, init/0]).
+-export([start/1, init/0, fullAutoPlay/0]).
 
 init() ->
   lists:foreach(fun(X) -> compile:file(X) end, [board, utils, moves, generation, parser, evaluation]),
@@ -30,6 +30,19 @@ start(black) ->
   init(),
   makeAutoPlay(getInitBoard(), white).
 
+fullAutoPlay() ->
+  init(),
+  autoPlay(board:getInitBoard(), white).
+
+autoPlay(Board, Color) ->
+  case isWinner(Board, reverseColor(Color)) of
+    true -> io:format("~p wins!!", [reverseColor(Color)]);
+    false ->
+      io:format("~n~p", [parseAllMoves(getPermittedMoves(Board, Color))]),
+      printBoard(Board),
+      BestMove = getTheBestMove(Board, Color, ?LEVELS, ?CLEVELS),
+      autoPlay(makeMove(Board, BestMove), reverseColor(Color))
+  end.
 gameLoop(Board, Color) ->
   case isWinner(Board, reverseColor(Color)) of
     true -> io:format("~p wins!!", [reverseColor(Color)]);
@@ -57,6 +70,7 @@ makeAutoPlay(Board, Color) ->
   case isWinner(Board, reverseColor(Color)) of
     true -> io:format("~p wins!!", [reverseColor(Color)]);
     false ->
+      io:format("~n~p", [parseAllMoves(getPermittedMoves(Board, Color))]),
       printBoard(Board),
       BestMove = getTheBestMove(Board, Color, ?LEVELS, ?CLEVELS),
       gameLoop(makeMove(Board, BestMove), reverseColor(Color))

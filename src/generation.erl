@@ -12,8 +12,7 @@
 -import(evaluation, [evaluateBoard/2]).
 -import(utils, [reverseColor/1, splitList/2]).
 %% API
--compile(export_all).
-%%-export([]).
+-export([getTheBestMove/4]).
 getTreeValue(Move, Board, 0, _, Color, _, _) ->
   {evaluateBoard(Color, makeMove(Board, Move)), Move};
 

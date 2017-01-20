@@ -11,8 +11,8 @@
 -author("oszust").
 
 %% API
--compile(export_all).
 -import(utils, [isInBounds/1, replaceNth/3, getColor/1, getField/2, signum/1, isEmpty/2]).
+-export([getPermittedMoves/2, makeMove/2]).
 
 createLine({X, Y}, Length, ne) when Length > 0 ->
   [{X + A, Y + B} || A <- lists:seq(-Length, -1), B <- lists:seq(1, Length), isInBounds({X + A, Y + B}), (X + A) + (Y + B) == X + Y];
@@ -161,7 +161,7 @@ getJumpList(Board, CurField, Pos, Color, Dir) ->
     nothing -> [];
     _Else ->
       NextPos = getNeighbour(EnemyPos, Dir),
-      addToEveryList(NextPos, getJump(makeMove(Board, [Pos, NextPos]), NextPos, Color))
+      addToEveryList(NextPos, getJump(processJump(Board, [Pos, NextPos]), NextPos, Color))
   end.
 
 getMaxStepLength({_, king}) ->
@@ -182,7 +182,7 @@ notEmptyJump(_) ->
   true.
 
 getPossibleJumps(Board, Color) ->
-  lists:filter(fun ?MODULE:notEmptyJump/1, getAllJumps(Board, Color)).
+  lists:filter(fun(X) -> notEmptyJump(X) == true end, getAllJumps(Board, Color)).
 
 getPermittedMoves(Board, Color) ->
   Jumps = getPossibleJumps(Board, Color),

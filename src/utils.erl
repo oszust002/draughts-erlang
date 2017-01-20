@@ -10,8 +10,10 @@
 -author("oszust").
 
 %% API
--compile(export_all).
 -include("consts.hrl").
+
+-export([isInBounds/1, replaceNth/3, isEmpty/2, getColor/1, signum/1,
+  reverseColor/1, splitList/2, test_avg/4, loadAllModules/0]).
 
 isInBounds({X, Y}) when is_integer(X), is_integer(Y) ->
   X =< 8 andalso X > 0 andalso Y > 0 andalso Y =< 8.
@@ -28,15 +30,6 @@ getField(Board, {X, Y}) ->
 
 getColor({Color, _}) ->
   Color.
-
-getFigure({_, Figure}) ->
-  Figure.
-
-isKing({_, Figure}) ->
-  Figure == king.
-
-isPawn({_, Figure}) ->
-  Figure == pawn.
 
 signum(X) when X > 0 ->
   1;
