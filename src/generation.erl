@@ -12,7 +12,7 @@
 -import(evaluation, [evaluateBoard/2]).
 -import(utils, [reverseColor/1, splitList/2]).
 %% API
--export([getTheBestMove/4]).
+-export([getTheBestMove/4,getTreeValue/7,getTheBestMove/5, execute/3]).
 getTreeValue(Move, Board, 0, _, Color, _, _) ->
   {evaluateBoard(Color, makeMove(Board, Move)), Move};
 
@@ -85,30 +85,31 @@ getTheBestMove(Board, Color, Levels, CLevels) ->
   S = self(),
   PermittedMoves = getPermittedMoves(Board, Color),
   BaseArgs = [Board, Color, Levels, CLevels],
-  {_, Move} = case nodes() of
-    [] -> getTheBestMove(PermittedMoves, Board, Color, Levels, CLevels);
-    Nodes ->
-      SplittedMoves = splitList(PermittedMoves, length(Nodes)),
-      Zipped = lists:zip(lists:sublist(Nodes, max(length(SplittedMoves), length(Nodes))),
-        lists:sublist(SplittedMoves, max(length(SplittedMoves), length(Nodes)))),
-      PidMovesMap = lists:map(fun({Node, Moves}) ->
-        {spawn_link(Node, ?MODULE, execute, [S, getTheBestMove, [Moves | BaseArgs]]), Moves} end, Zipped),
-      lists:max(getMoveScores(PidMovesMap, S, execute, BaseArgs))
-  end,
+  Nodes = nodes(),
+  [MainNode | Rest]= splitList(PermittedMoves, length(Nodes)+1),
+  Zipped = lists:zip(lists:sublist(Nodes, min(length(Rest), length(Nodes))), Rest),
+  PidMovesMap = lists:map(fun({Node, Moves}) ->
+    {spawn_link(Node, ?MODULE, execute, [S, getTheBestMove, [Moves | BaseArgs]]), Moves} end, Zipped),
+  {_, Move} = lists:max([getTheBestMove(MainNode, Board, Color, Levels, CLevels)
+    | getMoveScores(PidMovesMap, S, execute, BaseArgs)]),
   Move.
 
-getMoveScores([], _, _, _) ->
-  [];
-
 getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args) ->
+  getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args, []).
+
+getMoveScores([], _, _, _, Result) ->
+  Result;
+
+getMoveScores(PidMoveMap=[{Pid,MoveValue}| T], ParentPid, RestartFunc, Args, Result) ->
   receive
     {Pid, {Value, Move}} ->
-      [{Value, Move} | getMoveScores(lists:keydelete(Pid, 1, PidMoveMap), ParentPid, RestartFunc, Args)];
-    {'EXIT', _, normal} ->
-      getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args);
-    {'EXIT', ExitPid, _} ->
-      io:format("pizda"),
-      {MoveValue, _, NewList} = lists:keytake(ExitPid, 1, PidMoveMap),
+      getMoveScores(T, ParentPid, RestartFunc, Args, [{Value,Move} | Result]);
+    {'EXIT', Pid, normal} ->
+      getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args, Result);
+    {'EXIT', Pid, R} ->
+      io:format("~p", [R]),
       getMoveScores([spawn_link(fun() ->
-        execute(ParentPid, RestartFunc, [MoveValue | Args]) end) | NewList], ParentPid, RestartFunc, Args)
+        execute(ParentPid, RestartFunc, [MoveValue | Args]) end) | T], ParentPid, RestartFunc, Args)
+    after 20000 ->
+      c:flush()
   end.
