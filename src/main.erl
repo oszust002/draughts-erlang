@@ -28,7 +28,10 @@ start(white) ->
 
 start(black) ->
   init(),
-  makeAutoPlay(getInitBoard(), white).
+  makeAutoPlay(getInitBoard(), white);
+
+start(_) ->
+  only_black_or_white.
 
 fullAutoPlay() ->
   init(),
