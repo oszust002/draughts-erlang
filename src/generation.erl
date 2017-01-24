@@ -94,22 +94,25 @@ getTheBestMove(Board, Color, Levels, CLevels) ->
     | getMoveScores(PidMovesMap, S, execute, BaseArgs)]),
   Move.
 
+getMoveScores([], _, _, _) ->
+  [];
+
 getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args) ->
-  getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args, []).
-
-getMoveScores([], _, _, _, Result) ->
-  Result;
-
-getMoveScores(PidMoveMap=[{Pid,MoveValue}| T], ParentPid, RestartFunc, Args, Result) ->
   receive
     {Pid, {Value, Move}} ->
-      getMoveScores(T, ParentPid, RestartFunc, Args, [{Value,Move} | Result]);
-    {'EXIT', Pid, normal} ->
-      getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args, Result);
-    {'EXIT', Pid, R} ->
+      NewList = lists:keydelete(Pid, 1, PidMoveMap),
+      if
+        length(NewList) == length(PidMoveMap) -> self() ! {Pid, {Value, Move}};
+        true -> ok
+      end,
+      [{Value, Move} | getMoveScores(NewList, ParentPid, RestartFunc, Args)];
+    {'EXIT', _, normal} ->
+      getMoveScores(PidMoveMap, ParentPid, RestartFunc, Args);
+    {'EXIT', ExitPid, R} ->
       io:format("~p", [R]),
+      {MoveValue, _, NewList} = lists:keytake(ExitPid, 1, PidMoveMap),
       getMoveScores([spawn_link(fun() ->
-        execute(ParentPid, RestartFunc, [MoveValue | Args]) end) | T], ParentPid, RestartFunc, Args)
+        execute(ParentPid, RestartFunc, [MoveValue | Args]) end) | NewList], ParentPid, RestartFunc, Args)
     after 20000 ->
       c:flush()
   end.

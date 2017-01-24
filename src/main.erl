@@ -36,9 +36,8 @@ fullAutoPlay() ->
 
 autoPlay(Board, Color) ->
   case isWinner(Board, reverseColor(Color)) of
-    true -> io:format("~p wins!!", [reverseColor(Color)]);
+    true -> io:format("~p wins!!~n", [reverseColor(Color)]);
     false ->
-      io:format("~n~p", [parseAllMoves(getPermittedMoves(Board, Color))]),
       printBoard(Board),
       BestMove = getTheBestMove(Board, Color, ?LEVELS, ?CLEVELS),
       autoPlay(makeMove(Board, BestMove), reverseColor(Color))
