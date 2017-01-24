@@ -6,6 +6,9 @@
 %%% @end
 %%% Created : 01. Jan 2017 19:47
 %%%-------------------------------------------------------------------
+-define(LEVELS, 6).
+-define(CLEVELS, 2).
+
 -define(WHITE_PAWN, {white, pawn}).
 -define(BLACK_PAWN, {black, pawn}).
 -define(WHITE_KING, {white, king}).
@@ -20,4 +23,4 @@
   [?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing],
   [nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN],
   [?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing, ?WHITE_PAWN, nothing]
-  ]).
+]).
