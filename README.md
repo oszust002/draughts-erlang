@@ -11,7 +11,7 @@ c(main).
 ```
 And now run draughts in one of 2 possible modes:
 
-1. Player vs CPU:
+* Player vs CPU:
 ```
 main:start(white).
 ```
@@ -19,7 +19,8 @@ or
 ```
 main:start(black).
 ```
-2. CPU vs CPU:
+
+* CPU vs CPU:
 ```
 main:fullAutoPlay().
 ```
