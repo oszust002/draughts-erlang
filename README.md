@@ -10,6 +10,7 @@ Now compile module 'main':
 c(main).
 ```
 And now run draughts in one of 2 possible modes:
+
 1. Player vs CPU:
 ```
 main:start(white).
