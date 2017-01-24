@@ -24,3 +24,5 @@ main:start(black).
 ```
 main:fullAutoPlay().
 ```
+
+Moves are in PGN notation.
